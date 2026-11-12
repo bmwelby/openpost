@@ -12,8 +12,8 @@ WORKDIR /src
 COPY --from=web-tests /src/apps/server /src/apps/server
 WORKDIR /src/apps/server
 RUN go mod download
-RUN go test -timeout 15m ./internal/platform ./internal/capabilities
-RUN go test -timeout 25m ./...
+RUN GOMAXPROCS=2 go test -p 1 -timeout 20m ./internal/platform ./internal/capabilities
+RUN GOMAXPROCS=2 go test -p 1 -timeout 30m ./...
 
 FROM alpine:3.24.1 AS qualification-result
 COPY --from=backend-tests /src/apps/server/go.mod /tmp/qualified-go.mod
