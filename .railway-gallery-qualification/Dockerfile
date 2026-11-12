@@ -6,7 +6,7 @@ COPY . .
 RUN bun install --frozen-lockfile --filter @openpost/web --filter openpost --filter "./packages/*"
 RUN cd apps/web && bun run sync && bunx vitest run --project server src/lib/media-capabilities.test.ts
 
-FROM public.ecr.aws/docker/library/golang:1.26.9-alpine AS backend-tests
+FROM public.ecr.aws/docker/library/golang:1.27.3-alpine AS backend-tests
 RUN apk add --no-cache gcc musl-dev sqlite-dev git
 WORKDIR /src
 COPY --from=web-tests /src/apps/server /src/apps/server
