@@ -4,6 +4,8 @@ FROM public.ecr.aws/docker/library/golang:1.27.3-alpine AS capabilities-test
 RUN apk add --no-cache gcc musl-dev sqlite-dev git
 WORKDIR /src/apps/server
 COPY apps/server/ ./
+# The full capabilities conformance suite reads this shared repository-level fixture.
+COPY packages/platform-text/conformance/ /src/packages/platform-text/conformance/
 ENV GOMAXPROCS=1 GOMEMLIMIT=1500MiB GOGC=50
 RUN go mod download
 RUN echo 'QA: focused Bluesky capabilities tests' && go test -p 1 -count=1 -v -timeout 10m -run 'TestBluesky' ./internal/capabilities
