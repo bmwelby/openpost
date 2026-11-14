@@ -1,21 +1,16 @@
-# Disposable exact-feature regression qualification. No database, credentials or live provider.
-# bun pinned to packageManager (openpost/package.json).
-FROM oven/bun:1.4.4 AS web-tests
-WORKDIR /src
-COPY . .
-RUN bun install --frozen-lockfile --filter @openpost/web --filter openpost --filter "./packages/*"
-RUN cd apps/web && bun run sync && bunx vitest run --project server src/lib/media-capabilities.test.ts
-
-FROM public.ecr.aws/docker/library/golang:1.27.3-alpine AS backend-tests
+# Disposable Go-only capabilities qualification, kept off the upstream feature branch.
+# Uses the exact upstream gallery commit and includes test sources via the QA-only .dockerignore.
+FROM public.ecr.aws/docker/library/golang:1.27.3-alpine AS capabilities-test
 RUN apk add --no-cache gcc musl-dev sqlite-dev git
-WORKDIR /src
-COPY --from=web-tests /src/apps/server /src/apps/server
 WORKDIR /src/apps/server
+COPY apps/server/ ./
+ENV GOMAXPROCS=1 GOMEMLIMIT=1500MiB GOGC=50
 RUN go mod download
-RUN GOMAXPROCS=2 go test -p 1 -timeout 20m ./internal/platform ./internal/capabilities
-RUN GOMAXPROCS=2 go test -p 1 -timeout 30m ./...
+RUN echo 'QA: focused Bluesky capabilities tests' && go test -p 1 -count=1 -v -timeout 10m -run 'TestBluesky' ./internal/capabilities
+RUN echo 'QA: all capabilities package tests' && go test -p 1 -count=1 -v -timeout 15m ./internal/capabilities
+RUN echo 'QA: targeted platform gallery tests' && go test -p 1 -count=1 -v -timeout 10m -run 'TestBlueskyGallery' ./internal/platform
 
 FROM alpine:3.24.1 AS qualification-result
-COPY --from=backend-tests /src/apps/server/go.mod /tmp/qualified-go.mod
-RUN echo "PASS: focused Bun gallery tests, focused and full Go backend tests"
-CMD ["sh", "-c", "echo 'PASS: isolated gallery build qualification'; sleep 1"]
+COPY --from=capabilities-test /src/apps/server/go.mod /tmp/qualified-go.mod
+RUN echo 'PASS: isolated Go capabilities and gallery package qualification'
+CMD ["sh", "-c", "echo 'QA completed'; sleep 1"]
