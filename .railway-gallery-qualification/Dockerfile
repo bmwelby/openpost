@@ -7,7 +7,7 @@ COPY apps/server/ ./
 ENV GOMAXPROCS=1 GOMEMLIMIT=1500MiB GOGC=50
 RUN go mod download
 RUN echo 'QA: focused Bluesky capabilities tests' && go test -p 1 -count=1 -v -timeout 10m -run 'TestBluesky' ./internal/capabilities
-RUN echo 'QA: all capabilities package tests' && go test -p 1 -count=1 -v -timeout 15m ./internal/capabilities
+RUN echo 'QA: all capabilities package tests (quiet failures only)' && go test -p 1 -count=1 -timeout 15m ./internal/capabilities
 RUN echo 'QA: targeted platform gallery tests' && go test -p 1 -count=1 -v -timeout 10m -run 'TestBlueskyGallery' ./internal/platform
 
 FROM alpine:3.24.1 AS qualification-result
