@@ -11,7 +11,7 @@ RUN go mod download
 RUN echo 'QA: focused Bluesky capabilities tests' && go test -p 1 -count=1 -v -timeout 10m -run 'TestBluesky' ./internal/capabilities
 RUN echo 'QA: all capabilities package tests (quiet failures only)' && go test -p 1 -count=1 -timeout 15m ./internal/capabilities
 RUN echo 'QA: targeted platform gallery tests' && go test -p 1 -count=1 -v -timeout 10m -run 'TestBlueskyGallery' ./internal/platform
-RUN echo 'QA: full Go backend test suite' && go test -p 1 -count=1 -timeout 30m ./...
+RUN echo 'QA: full Go backend test suite (supported dev build tag)' && go test -tags dev -p 1 -count=1 -timeout 30m ./...
 
 FROM alpine:3.24.1 AS qualification-result
 COPY --from=capabilities-test /src/apps/server/go.mod /tmp/qualified-go.mod
