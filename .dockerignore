@@ -68,11 +68,8 @@ Dockerfile
 .github/
 .gitlab-ci.yml
 
-# Tests
-**/test/
-**/__tests__/
-**/*.test.*
-**/*.spec.*
+# Test sources are intentionally included for the disposable QA-only image.
+# This override is isolated to the QA branch, not the feature PR.
 
 # Vitest examples (already removed but in case)
 apps/web/src/lib/vitest-examples/
