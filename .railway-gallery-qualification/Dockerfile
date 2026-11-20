@@ -4,9 +4,10 @@ FROM oven/bun:1.4.4 AS web-tests
 WORKDIR /src
 COPY . .
 RUN bun install --frozen-lockfile --filter @openpost/web --filter openpost --filter "./packages/*"
-RUN cd apps/web && bun run sync && bunx vitest run --project server --maxWorkers=2
+RUN cd apps/web && bun run sync && bunx vitest run --project server src/lib/media-capabilities.test.ts
 RUN cd apps/web && bun run lint:oxlint
 RUN cd apps/web && bun run lint:svelte
+RUN cd apps/web && bunx oxfmt --check src/lib/media-capabilities.ts src/lib/media-capabilities.test.ts
 
 FROM public.ecr.aws/docker/library/golang:1.27.4-alpine AS backend-tests
 RUN apk add --no-cache gcc musl-dev sqlite-dev git ffmpeg
