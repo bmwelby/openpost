@@ -8,7 +8,7 @@ COPY --from=bun_binary /usr/local/bin/bun /usr/local/bin/bun
 WORKDIR /src
 COPY . .
 ENV CI=true
-RUN node --version && bun --version
+RUN ln -s /usr/local/bin/bun /usr/local/bin/bunx && node --version && bun --version && bunx --version
 RUN bun install --frozen-lockfile
 RUN cd apps/web && bun run sync
 RUN echo 'RUN: exact frontend production-mode Vitest suite' && bun run --filter @openpost/web test:production
