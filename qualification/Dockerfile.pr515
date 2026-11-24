@@ -1,0 +1,12 @@
+FROM golang:1.27.4-bookworm AS go
+FROM oven/bun:1.4.4 AS bun
+FROM node:24.19.0-bookworm
+COPY --from=go /usr/local/go /usr/local/go
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
+ENV PATH=/usr/local/go/bin:/root/go/bin:$PATH CI=true GOTOOLCHAIN=local
+RUN apt-get update && apt-get install -y --no-install-recommends git ffmpeg jq ca-certificates build-essential && rm -rf /var/lib/apt/lists/*
+RUN git clone --no-checkout https://github.com/bmwelby/openpost.git /qual && cd /qual && git checkout --detach c91c2547579ff598e6a8dc4413e5b28f0aaf9f34 && test "$(git rev-parse HEAD)" = "c91c2547579ff598e6a8dc4413e5b28f0aaf9f34" && git status --porcelain && git rev-parse HEAD
+WORKDIR /qual
+COPY qualification/pr515.sh /usr/local/bin/pr515-qualification
+RUN bash /usr/local/bin/pr515-qualification
+CMD ["true"]
